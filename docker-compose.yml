@@ -7,7 +7,7 @@ services:
   site:
     build:
       context: .
-      dockerfile: nginx.dockerfile
+      dockerfile: docker/nginx.dockerfile
     container_name: nginx
     ports:
       - 80:80
@@ -16,30 +16,30 @@ services:
       - ./wordpress:/var/www/html:delegated
     depends_on:
       - php
-      - mysql
+      - mariadb
     networks:
       - wordpress
 
-  mysql:
-    image: mysql:5.7.29
-    container_name: mysql
+  mariadb:
+    image: mariadb:10.8.3
+    container_name: mariadb
     restart: always
     ports:
       - 3306:3306
     environment:
-      MYSQL_DATABASE: wp
-      MYSQL_USER: wp
-      MYSQL_PASSWORD: secret
-      MYSQL_ROOT_PASSWORD: secret
+      MARIADB_DATABASE: wp
+      MARIADB_USER: wp
+      MARIADB_PASSWORD: secret
+      MARIADB_ROOT_PASSWORD: secret
       SERVICE_TAGS: dev
-      SERVICE_NAME: mysql
+      SERVICE_NAME: mariadb
     networks:
       - wordpress
 
   php:
     build:
       context: .
-      dockerfile: php.dockerfile
+      dockerfile: docker/php.dockerfile
     container_name: php
     volumes:
       - ./wordpress:/var/www/html:delegated
@@ -49,7 +49,7 @@ services:
   wp:
     build:
       context: .
-      dockerfile: php.dockerfile
+      dockerfile: docker/php.dockerfile
     container_name: wp
     entrypoint: ['wp', '--allow-root']
     volumes:
