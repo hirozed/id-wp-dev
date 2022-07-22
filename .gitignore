@@ -223,3 +223,6 @@ Docker/debug
 /build/
 clover.xml
 /languages/
+
+#certs
+*.pem

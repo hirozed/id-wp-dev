@@ -5,7 +5,7 @@ ENV XDEBUG_IDEKEY docker
 
 RUN touch /var/log/error_log
 
-ADD ./php/www.conf /usr/local/etc/php-fpm.d/www.conf
+ADD ./docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 RUN addgroup -g 1000 wp && adduser -G wp -g wp -s /bin/sh -D wp
 

@@ -1,7 +1,6 @@
 DOCKER_RUN     := @docker run --rm
 COMPOSER_IMAGE := -v "$$(pwd):/app" --user $$(id -u):$$(id -g) composer
 NODE_IMAGE     := -w /home/node/app -v "$$(pwd):/home/node/app" --user node node:lts
-HAS_LANDO      := $(shell command -v lando 2> /dev/null)
 HIGHLIGHT      :=\033[0;32m
 END_HIGHLIGHT  :=\033[0m # No Color
 
@@ -16,7 +15,9 @@ clean:
 
 .PHONY: destroy
 destroy: ## Destroys the developer environment completely (this is irreversible)
-	lando destroy -y
+	docker compose down
+	docker compose down --volumes
+	docker compose down --rmi
 	$(MAKE) clean
 
 .PHONY: flush-cache
@@ -36,15 +37,12 @@ help:  ## Display help
 			printf "\033[36m%-30s\033[0m %s\n", $$1, $$NF \
 		}' $(MAKEFILE_LIST) | sort
 
-.PHONY: install
-install: | clean
 
-.PHONY: lando-start
-lando-start:
-ifdef HAS_LANDO
+.PHONY: dc-start
+dc-start:
 	if [ ! "$$(docker ps | grep cfa_appserver)" ]; then \
-		echo "Starting Lando"; \
-		lando start; \
+		echo "Running Docker Compose"; \
+		docker compose up; \
 	fi
 	if [ ! -f ./wordpress/wp-config.php ]; then \
 		$(MAKE) setup-wordpress; \
@@ -55,16 +53,13 @@ ifdef HAS_LANDO
 	if [ ! -d ./r2-cfa/.git ]; then \
 		$(MAKE) download-repo; \
 	fi
-endif
 
-.PHONY: lando-stop
-lando-stop:
-ifdef HAS_LANDO
+.PHONY: dc-stop
+dc-stop:
 	if [ "$$(docker ps | grep cfa_appserver)" ]; then \
-		echo "Stopping Lando"; \
-		lando stop; \
+		echo "Stopping..."; \
+		docker compose stop; \
 	fi
-endif
 
 .PHONY: open
 open: ## Open the development site in your default browser
